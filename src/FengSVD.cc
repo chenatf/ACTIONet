@@ -1,6 +1,6 @@
-#include "ACTION.h"
+#include "ACTIONet.h"
 
-// From: Xu Feng, Yuyang Xie, and Yaohang Li, "Fast Randomzied PCA for Sparse Data," in Proc. the 10th Asian Conference on Machine Learning (ACML), Beijing, China, Nov. 2018.
+// From: Xu Feng, Yuyang Xie, and Yaohang Li, "Fast Randomzied SVD for Sparse Data," in Proc. the 10th Asian Conference on Machine Learning (ACML), Beijing, China, Nov. 2018.
 namespace ACTIONet {
 	field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed = 0) {	
 		int s = 5;
@@ -8,17 +8,17 @@ namespace ACTIONet {
 		int m = A.n_rows;
 		int n = A.n_cols;
 		
-		printf("\t\tRunning randomized PCA. Matrix size: %d x %d (# iters = %d)\n", m, n, iters); fflush(stdout);
+		printf("\t\tRunning randomized SVD. Matrix size: %d x %d (# iters = %d)\n", m, n, iters); fflush(stdout);
 				
 		vec S;
 		mat Q, L, U, V;
 		field<mat> SVD_out;
 		
 		if(m < n) {
-			printf("\t\t\tInitializing PCA (mode 1) ... ");
+			printf("\t\t\tInitializing SVD (mode 1) ... ");
 			//arma_rng::set_seed(seed);			
 			//Q = randn( n, dim+s );
-			Q = sampleUnif(0, 1, n, dim+s, seed);
+			Q = sampleUnif(n, dim+s, 0.0, 1.0, seed);
 			Q = A*Q;
 			if (iters == 0) {
 				SVD_out = eigSVD(Q);
@@ -54,10 +54,10 @@ namespace ACTIONet {
 			S = flipud(S(span(s, dim+s-1)));
 		}
 		else {
-			printf("\t\t\tInitializing PCA (mode 2) ... ");				
+			printf("\t\t\tInitializing SVD (mode 2) ... ");				
 			// arma_rng::set_seed(seed);
 			// Q = randn( m, dim+s ); 
-			Q = sampleUnif(0.0, 1.0, m, dim+s, seed);
+			Q = sampleUnif(m, dim+s, 0.0, 1.0, seed);
 			Q = trans(A)*Q;
 			if (iters == 0) {
 				SVD_out = eigSVD(Q);
@@ -107,24 +107,24 @@ namespace ACTIONet {
 	}
 
 
-	// From: Xu Feng, Yuyang Xie, and Yaohang Li, "Fast Randomzisped PCA for Sparse Data," in Proc. the 10th Asian Conference on Machine Learning (ACML), Beijing, China, Nov. 2018.
+	// From: Xu Feng, Yuyang Xie, and Yaohang Li, "Fast Randomzisped SVD for Sparse Data," in Proc. the 10th Asian Conference on Machine Learning (ACML), Beijing, China, Nov. 2018.
 	field<mat> FengSVD(mat &A, int dim, int iters, int seed = 0) {	
 		int s = 5;
 
 		int m = A.n_rows;
 		int n = A.n_cols;
 		
-		printf("\t\tRunning randomized PCA (full matrix version). Matrix size: %d x %d (# iters = %d)\n", m, n, iters); fflush(stdout);
+		printf("\t\tRunning randomized SVD (full matrix version). Matrix size: %d x %d (# iters = %d)\n", m, n, iters); fflush(stdout);
 				
 		vec S;
 		mat Q, L, U, V;
 		field<mat> SVD_out;
 		
 		if(m < n) {
-			printf("\t\t\tInitializing PCA (mode 1) ... ");
+			printf("\t\t\tInitializing SVD (mode 1) ... ");
 			//arma_rng::set_seed(seed);			
 			//Q = randn( n, dim+s );
-			Q = sampleUnif(0.0, 1.0, n, dim+s, seed);
+			Q = sampleUnif(n, dim+s, 0.0, 1.0, seed);
 			Q = A*Q;
 			if (iters == 0) {
 				SVD_out = eigSVD(Q);
@@ -160,10 +160,10 @@ namespace ACTIONet {
 			S = flipud(S(span(s, dim+s-1)));
 		}
 		else {
-			printf("\t\t\tInitializing PCA (mode 2) ... ");				
+			printf("\t\t\tInitializing SVD (mode 2) ... ");				
 			// arma_rng::set_seed(seed);
 			// Q = randn( m, dim+s ); 
-			Q = sampleUnif(0.0, 1.0, m, dim+s, seed);
+			Q = sampleUnif(m, dim+s, 0.0, 1.0, seed);
 			Q = trans(A)*Q;
 			if (iters == 0) {
 				SVD_out = eigSVD(Q);
