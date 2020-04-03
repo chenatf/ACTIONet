@@ -22,8 +22,11 @@
 #include <ctime>
 
 #include <arma_base.h>
+#include <my_utils.h>
 
 namespace ACTIONet {
+	
+	
 	field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed);
 	field<mat> FengSVD(mat &A, int dim, int iters, int seed);
 	
