@@ -2,16 +2,16 @@ UNAME=$(shell uname -s)
 LIBNAME:=libactionet.a
 
 
-CXXFLAGS=-g3 -std=c++11 -pthread -fopenmp -w -m64 -fPIC -march=native -O4 -DUSE_BLAS_LIB -DAXPBY -DINT_64BITS
+CXXFLAGS=-g3 -std=c++11 -pthread -fopenmp -w -m64 -fPIC -march=native -O2 -DUSE_BLAS_LIB -DAXPBY -DINT_64BITS
 LINALG=-lopenblas -llapack
 #LINALG=-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_gnu_thread -lmkl_core -lgomp -lpthread -lm -ldl	
 LIB_FLAGS+=-lstdc++ ${LINALG} -lpthread
-INCLUDE=-I./include
+INCLUDE=-I./include -I./include/SPAMS
 
-SRC=src/FengSVD.cc src/HalkoSVD.cc src/my_utils.cc
+SRC=src/my_utils.cc src/FengSVD.cc src/HalkoSVD.cc src/reduced_kernels.cc src/arch.cc src/ACTION_decomp.cc
 OBJ=$(SRC:.cc=.o)
 
-PROGRAM=test
+PROGRAM=test_run
 	
 all: $(PROGRAM) message
 	
@@ -22,7 +22,7 @@ src/%.o: src/%.cc
 $(LIBNAME): $(OBJ)
 	ar -rcs $@ $(OBJ)
 
-test: $(LIBNAME) src/test.o
+test_run: $(LIBNAME) src/test_run.o
 	$(CXX) $(CXXFLAGS)  -o $@ src/test.o -L. $(LIBNAME) $(LIB_FLAGS)	
 
 .PHONY: clean ar
