@@ -576,7 +576,7 @@ namespace ACTIONet {
 					
 		Vector<double> refColX;
 		Vector<double> refColAlphaT;	
-		for(register int i = 0; i < B_cols; i++) {
+		for(int i = 0; i < B_cols; i++) {
 			X.refCol(i, refColX);
 			AlphaT.refCol(i, refColAlphaT);
 
