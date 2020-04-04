@@ -1,17 +1,20 @@
-UNAME=$(shell uname -s)
 LIBNAME:=libactionet.a
 
+CXX=dpcpp
+CXXFLAGS=-O2 -std=c++17 -fsycl -pthread -fPIC -w
+EXTFLAGS=-fsycl-unnamed-lambda
 
-CXXFLAGS=-g3 -std=c++11 -pthread -fopenmp -w -m64 -fPIC -march=native -O2 -DUSE_BLAS_LIB -DAXPBY -DINT_64BITS
-LINALG=-lopenblas -llapack
+
+#LINALG=-lopenblas -llapack
 #LINALG=-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_gnu_thread -lmkl_core -lgomp -lpthread -lm -ldl	
-LIB_FLAGS+=-lstdc++ ${LINALG} -lpthread
-INCLUDE=-I./include -I./include/SPAMS
+LINALG=-L${MKLROOT}/lib/intel64 -lmkl_sycl -lmkl_intel_ilp64 -lmkl_tbb_thread -lmkl_core -lsycl -lOpenCL -ltbb -lpthread -lm -ldl
+LIB_FLAGS+=-lstdc++ ${LINALG}
+INCLUDE=-I./include/ACTIONet/ -I./include/ACTIONet/SPAMS -I./include/arma/arma/include/
 
-SRC=src/my_utils.cc src/FengSVD.cc src/HalkoSVD.cc src/reduced_kernels.cc src/arch.cc src/ACTION_decomp.cc
+SRC=$(shell find src/ACTIONet -type f -name "*.cc")
 OBJ=$(SRC:.cc=.o)
 
-PROGRAM=test_run
+PROGRAM=run_test
 	
 all: $(PROGRAM) message
 	
@@ -19,16 +22,13 @@ src/%.o: src/%.cc
 	$(CXX) $(CXXFLAGS) ${INCLUDE} -c -o $@  $<
 
 
-$(LIBNAME): $(OBJ)
-	ar -rcs $@ $(OBJ)
-
-test_run: $(LIBNAME) src/test_run.o
-	$(CXX) $(CXXFLAGS)  -o $@ src/test.o -L. $(LIBNAME) $(LIB_FLAGS)	
+run_test: $(OBJ) src/run_test.o
+	$(CXX) $(CXXFLAGS)  -o $@ src/run_test.o -L. $(OBJ) $(LIB_FLAGS)	
 
 .PHONY: clean ar
 
 clean:
-	rm -f $(PROGRAM)  src/*.o src/*~ include/*~ *~ $(LIBNAME) 
+	rm -f $(PROGRAM) $(OBJ) $(LIBNAME) 
 
 ar:
 	make clean

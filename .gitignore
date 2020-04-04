@@ -8,3 +8,4 @@
 *.so
 *.a
 test/
+run_test
