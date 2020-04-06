@@ -11,7 +11,7 @@ int main(int argc, char ** argv) {
 
 	//out(0).print("U");
 	
-	ReducedKernel red_out = reduce(A, 30, 5, 0, ACTIONRED_ALG, HALKO_ALG);
+	ReducedKernel red_out = reduce_kernel(A, 30, 5, 0, ACTIONRED_ALG, HALKO_ALG);
 	
 	mat S_r = red_out.S_r;
 	printf("S_r: %d x %d\n", S_r.n_rows, S_r.n_cols);

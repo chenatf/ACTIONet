@@ -1,15 +1,15 @@
 LIBNAME:=libactionet.a
 
 CXX=dpcpp
-CXXFLAGS=-O2 -std=c++17 -fsycl -pthread -fPIC -w
+CXXFLAGS=-O2 -std=c++17 -fsycl -pthread -fPIC -w -DMKL_ILP64 
 EXTFLAGS=-fsycl-unnamed-lambda
 
 
 #LINALG=-lopenblas -llapack
 #LINALG=-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_gnu_thread -lmkl_core -lgomp -lpthread -lm -ldl	
-LINALG=-L${MKLROOT}/lib/intel64 -lmkl_sycl -lmkl_intel_ilp64 -lmkl_tbb_thread -lmkl_core -lsycl -lOpenCL -ltbb -lpthread -lm -ldl
+LINALG=-L${MKLROOT}/lib/intel64 -lmkl_sycl -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lsycl -lOpenCL -lpthread -lm -ldl
 LIB_FLAGS+=-lstdc++ ${LINALG}
-INCLUDE=-I./include/ACTIONet/ -I./include/ACTIONet/SPAMS -I./include/arma/arma/include/
+INCLUDE=-I./include/ -I./include/arma/ -I./include/ACTIONet/ -I./include/ACTIONet/SPAMS -I./include/ACTIONet/hnsw -I${MKLROOT}/include
 
 SRC=$(shell find src/ACTIONet -type f -name "*.cc")
 OBJ=$(SRC:.cc=.o)

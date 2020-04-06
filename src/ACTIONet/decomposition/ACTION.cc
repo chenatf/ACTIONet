@@ -62,7 +62,7 @@ namespace ACTIONet {
 	}
 	
 	// Solves separable NMF problem
-	SPA_results SPA(mat A, int k) {	
+	SPA_results run_SPA(mat A, int k) {	
 		
 		SPA_results res;
 		
@@ -117,7 +117,7 @@ namespace ACTIONet {
 	}
 
 	// min(|| AX - B ||) s.t. simplex constraint
-	mat simplexRegression(mat &A, mat &B, double *X_ptr) { 
+	mat run_simplex_regression(mat &A, mat &B) { 
 		double *A_ptr = A.memptr();
 		double *B_ptr = B.memptr();
 		
@@ -125,9 +125,9 @@ namespace ACTIONet {
 		int B_rows = B.n_rows;
 		int B_cols = B.n_cols;
 		
-		simplexRegression(A_ptr, A_cols, B_ptr, B_rows, B_cols, X_ptr);
+		mat X(A.n_cols, B.n_cols);
+		simplexRegression(A_ptr, A_cols, B_ptr, B_rows, B_cols, X.memptr());
 		
-		mat X = mat(X_ptr, A.n_cols, B.n_cols);
 		X = clamp(X, 0, 1);
 		X = normalise(X, 1);
 
@@ -135,7 +135,7 @@ namespace ACTIONet {
 	}
 
 	// Solves the standard Archetypal Analysis (AA) problem
-	field<mat> AA (mat &A, mat &W0) {
+	field<mat> run_AA (mat &A, mat &W0) {
 		double *A_ptr = A.memptr();
 		double *W0_ptr = W0.memptr();
 		
@@ -189,11 +189,11 @@ namespace ACTIONet {
 		ParallelFor(k_min, k_max+1, thread_no, [&](size_t kk, size_t threadId) {			
 			total++;
 			printf("\tk = %d\n", total);
-			SPA_results SPA_res = SPA(X_r, kk);
+			SPA_results SPA_res = run_SPA(X_r, kk);
 			trace.selected_cols[kk] = SPA_res.selected_columns;
 			
 			mat W = X_r.cols(trace.selected_cols[kk]);
-			AA_res = AA(X_r, W);
+			AA_res = run_AA(X_r, W);
 
 			trace.C[kk] = AA_res(0);
 			trace.H[kk] = AA_res(1);			
@@ -226,7 +226,7 @@ namespace ACTIONet {
 		printf("Iterating from k=%d ... %d (auto stop = %d)\n", k_min, k_max, auto_stop);
 		for(int kk = k_min; kk <= k_max; kk++) {
 			printf("\tk = %d\n", kk);
-			SPA_results SPA_res = SPA(X_r, kk);
+			SPA_results SPA_res = run_SPA(X_r, kk);
 			trace.selected_cols[kk] = SPA_res.selected_columns;
 			
 			mat W = X_r.cols(trace.selected_cols[kk]);
@@ -236,7 +236,7 @@ namespace ACTIONet {
 			//W.print("W");
 			
 			
-			AA_res = AA(X_r, W);
+			AA_res = run_AA(X_r, W);
 			
 			if(auto_stop) {
 				mat C = AA_res(0);

@@ -2,6 +2,7 @@
 
 
 namespace ACTIONet {
+
 	ReducedKernel ACTION_reduction(sp_mat &S, int dim, int iter = 5, int seed = 0, int SVD_algorithm = HALKO_ALG) {			
 		int n = S.n_rows;
 		S = normalise(S, 2);    
@@ -33,7 +34,7 @@ namespace ACTIONet {
 				SVD_results = FengSVD(S, dim, iter, seed);				
 				break;
 			default:
-				fprintf(stderr, "Unknown SVD algorithm chosen (%d). Switching to Halko.\n");
+				fprintf(stderr, "Unknown SVD algorithm chosen (%d). Switching to Halko.\n", SVD_algorithm);
 				SVD_results = HalkoSVD(S, dim, iter, seed);				
 				break;
 		}
@@ -124,7 +125,7 @@ namespace ACTIONet {
 				SVD_results = FengSVD(S, dim, iter, seed);				
 				break;
 			default:
-				fprintf(stderr, "Unknown SVD algorithm chosen (%d). Switching to Halko.\n");
+				fprintf(stderr, "Unknown SVD algorithm chosen (%d). Switching to Halko.\n", SVD_algorithm);
 				SVD_results = HalkoSVD(S, dim, iter, seed);				
 				break;
 		}
@@ -184,17 +185,15 @@ namespace ACTIONet {
 		return output;	
 	}
 	
-	ReducedKernel reduce(sp_mat &S, int dim, int iter = 5, int seed = 0, int reduction_algorithm = ACTIONRED_ALG, int SVD_algorithm = HALKO_ALG) {
+	ReducedKernel reduce_kernel(sp_mat &S, int dim, int iter = 5, int seed = 0, int reduction_algorithm = ACTIONRED_ALG, int SVD_algorithm = HALKO_ALG) {
 		ReducedKernel output = ACTION_reduction(S, dim, iter, seed, SVD_algorithm);
 		
 		return(output);
 	}
 
-	ReducedKernel reduce(mat &S, int dim, int iter = 5, int seed = 0, int reduction_algorithm = ACTIONRED_ALG, int SVD_algorithm = HALKO_ALG) {
+	ReducedKernel reduce_kernel(mat &S, int dim, int iter = 5, int seed = 0, int reduction_algorithm = ACTIONRED_ALG, int SVD_algorithm = HALKO_ALG) {
 		ReducedKernel output = ACTION_reduction(S, dim, iter, seed, SVD_algorithm);
 		
 		return(output);	
 	}
-
-
 }

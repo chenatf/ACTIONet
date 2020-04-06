@@ -1,1 +1,1 @@
-Run `source /opt/intel/inteloneapi/mkl/2021.1-beta04/env/vars.sh` prior to make to set the ${MKLROOT}
+Run `source /opt/intel/inteloneapi/setvars.sh` prior to `make` to set the ${MKLROOT} and path to dpcpp
