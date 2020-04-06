@@ -1,5 +1,6 @@
 #include "ACTIONet.h"
 
+
 namespace ACTIONet {
 	mat sampleUnif(int l, int m, double a, double b, int seed) {
 		std::default_random_engine gen (seed);	
@@ -58,5 +59,15 @@ namespace ACTIONet {
 		return(out);
 	}	
 	
-	
+	mat zscore(mat A) {	
+		rowvec mu = mean(A, 0);
+		rowvec sigma = stddev(A, 0);
+
+		
+		for(int j = 0; j < A.n_cols; j++) {
+			A.col(j) = (A.col(j) - mu(j)) / sigma(j);
+		}
+		
+		return A;
+	}	
 }
