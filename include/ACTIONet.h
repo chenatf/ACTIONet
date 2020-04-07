@@ -90,9 +90,9 @@ namespace ACTIONet {
 		
 		// To store the output of run_ACTION()
 		struct ACTION_results {
-			vector<uvec> selected_cols;
-			vector<mat> H;
-			vector<mat> C;
+			field<uvec> selected_cols;
+			field<mat> H;
+			field<mat> C;
 		};
 
 		// To store the output of reconstruct_archetypes()
@@ -144,7 +144,7 @@ namespace ACTIONet {
 
 	// Pre-ACTIONet archetype filtering/aggregation
 	// To prune archetypes across different levels and concatenate the resulting archetypes
-		multilevel_archetypal_decomposition prune_archetypes(vector<mat> C_trace, vector<mat> H_trace, double min_specificity_z_threshold);
+		multilevel_archetypal_decomposition prune_archetypes(field<mat> C_trace, field<mat> H_trace, double min_specificity_z_threshold);
 		
 		
 	// Post-ACTIONet archetype filtering/aggregation
