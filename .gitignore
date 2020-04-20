@@ -11,3 +11,4 @@ test/
 include/arma
 src/run_test.cc
 include/ACTIONet/arma_base.h
+run_test
