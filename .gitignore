@@ -7,5 +7,5 @@
 ~*
 *.so
 *.a
-test/
+tests/tmp
 run_test

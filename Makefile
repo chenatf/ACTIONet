@@ -1,15 +1,9 @@
 LIBNAME:=libactionet.a
 
-CXX=dpcpp
-CXXFLAGS=-O2 -std=c++17 -fsycl -pthread -fPIC -w -DMKL_ILP64 
-EXTFLAGS=-fsycl-unnamed-lambda
-
-
-#LINALG=-lopenblas -llapack
-#LINALG=-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_gnu_thread -lmkl_core -lgomp -lpthread -lm -ldl	
-LINALG=-L${MKLROOT}/lib/intel64 -lmkl_sycl -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lsycl -lOpenCL -lpthread -lm -ldl
-LIB_FLAGS+=-lstdc++ ${LINALG}
-INCLUDE=-I./include/ -I./include/arma/ -I./include/ACTIONet/ -I./include/ACTIONet/SPAMS -I./include/ACTIONet/hnsw -I${MKLROOT}/include
+CXX=g++
+CXXFLAGS=-O4 -w -std=c++17 -DMKL_ILP64 -m64 -I${MKLROOT}/include
+LDFLAGS=-fPIC -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
+INCLUDE=-I./include/ -I./include/arma/ -I./include/ACTIONet/ -I./include/ACTIONet/SPAMS -I./include/ACTIONet/hnsw -I./include/ACTIONet/HDBSCAN -I${MKLROOT}/include
 
 SRC=$(shell find src/ACTIONet -type f -name "*.cc")
 OBJ=$(SRC:.cc=.o)
@@ -23,7 +17,7 @@ src/%.o: src/%.cc
 
 
 run_test: $(OBJ) src/run_test.o
-	$(CXX) $(CXXFLAGS)  -o $@ src/run_test.o -L. $(OBJ) $(LIB_FLAGS)	
+	$(CXX) $(CXXFLAGS)  -o $@ src/run_test.o -L. $(OBJ) $(LDFLAGS)	
 
 .PHONY: clean ar
 

@@ -17,7 +17,7 @@ int main(int argc, char ** argv) {
 	printf("S_r: %d x %d\n", S_r.n_rows, S_r.n_cols);
 	
 	
-	ACTION_results action_out = run_ACTION_dev(S_r, 2, 30, 1, true);
+	ACTION_results action_out = run_ACTION_dev(S_r, 2, 30, 1, true, 30, 0.01);
 	
 	return 0;
 }
