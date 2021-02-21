@@ -27,10 +27,10 @@ pip install git+https://github.com/shmohammadi86/ACTIONet@python-devel
 
 To install from source:  
 ```
-git clone --recurse-submodules https://github.com/shmohammadi86/ACTIONet.git. 
-git submodule update --init. 
-python setup.py build.  
-python setup.py develop. 
+git clone --recurse-submodules https://github.com/shmohammadi86/ACTIONet.git 
+git submodule update --init 
+python setup.py build  
+python setup.py develop 
 ```
 
 # Running ACTIONet
