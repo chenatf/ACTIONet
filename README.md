@@ -25,6 +25,14 @@ Use `pip` to install ACTIONet directly from this repository:
 pip install git+https://github.com/shmohammadi86/ACTIONet@python-devel
 ```
 
+To install from source:  
+```
+git clone --recurse-submodules https://github.com/shmohammadi86/ACTIONet.git. 
+git submodule update --init. 
+python setup.py build.  
+python setup.py develop. 
+```
+
 # Running ACTIONet
 **Note** If you are using `MKL`, make sure to properly [set the number of threads](https://software.intel.com/content/www/us/en/develop/documentation/mkl-macos-developer-guide/top/managing-performance-and-memory/improving-performance-with-threading/techniques-to-set-the-number-of-threads.html) used prior to running `ACTIONet`.
 
