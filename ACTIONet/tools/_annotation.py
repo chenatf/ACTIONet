@@ -7,6 +7,7 @@ from anndata import AnnData
 from . import _imputation as imputation
 from .. import _misc_utils as ut
 
+
 def annotate_archetypes_using_labels(
     adata: AnnData,
     label_key: Optional[str] = "cell_types",

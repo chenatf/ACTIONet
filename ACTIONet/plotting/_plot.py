@@ -14,13 +14,13 @@ from .. import _misc_utils as ut
 
 
 def layout_labels(
-    X: np.ndarray,
-    Y: np.ndarray,
-    labels: list,
-    ax: mpl.axes.Axes,
-    fontsize: Optional[int] = 1,
-    color: Optional[tuple] = (0., 0., 0., 1.),
-    background: Optional[tuple] = (1., 1., 1., 1.),
+        X: np.ndarray,
+        Y: np.ndarray,
+        labels: list,
+        ax: mpl.axes.Axes,
+        fontsize: Optional[int] = 1,
+        color: Optional[tuple] = (0., 0., 0., 1.),
+        background: Optional[tuple] = (1., 1., 1., 1.),
 ) -> None:
     texts = []
     if isinstance(color, tuple):
@@ -34,18 +34,19 @@ def layout_labels(
         texts.append(text)
     adjust_text(texts)
 
+
 def plot_ACTIONet(
-    adata: AnnData,
-    label_key: Optional[str] = None,
-    coordinate_key: Optional[str] = 'X_ACTIONet2D',
-    transparency_key: Optional[str] = None,
-    transparency_z_threshold: Optional[float] = -0.5,
-    transparency_factor: Optional[float] = 1.5,
-    border_contrast_factor: Optional[float] = 0.1,
-    node_size: Optional[float] = 0.1,
-    add_text: Optional[bool] = True,
-    palette: Optional[list] = None,
-    ax: Optional[mpl.axes.Axes] = None,
+        adata: AnnData,
+        label_key: Optional[str] = None,
+        coordinate_key: Optional[str] = 'ACTIONet2D',
+        transparency_key: Optional[str] = None,
+        transparency_z_threshold: Optional[float] = -0.5,
+        transparency_factor: Optional[float] = 1.5,
+        border_contrast_factor: Optional[float] = 0.1,
+        node_size: Optional[float] = 0.1,
+        add_text: Optional[bool] = True,
+        palette: Optional[list] = None,
+        ax: Optional[mpl.axes.Axes] = None,
 ) -> Optional[mpl.axes.Axes]:
     if coordinate_key not in adata.obsm.keys():
         raise ValueError(
@@ -88,8 +89,8 @@ def plot_ACTIONet(
     else:
         v_col_border = v_col_darkened
 
-    x = coordinates[:,0]
-    y = coordinates[:,1]
+    x = coordinates[:, 0]
+    y = coordinates[:, 1]
     x_min = np.min(x)
     x_max = np.max(x)
     y_min = np.min(y)
@@ -122,8 +123,8 @@ def plot_ACTIONet(
 
             colors.append(adjust_lightness(palette[i % len(palette)], 0.5))
         layout_labels(
-            centroids[:,0],
-            centroids[:,1],
+            centroids[:, 0],
+            centroids[:, 1],
             unique_labels,
             ax=_ax,
             color=colors,

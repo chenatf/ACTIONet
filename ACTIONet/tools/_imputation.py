@@ -12,6 +12,7 @@ import _ACTIONet as _an
 def impute_genes_using_archetypes(
     adata: AnnData, genes: list, archetypes_key: Optional[str] = "H_unified"
 ) -> AnnData:
+
     """
     Impute expression of genes by interpolating over archetype profile
 
@@ -29,6 +30,7 @@ def impute_genes_using_archetypes(
         AnnData
             cells x genes
     """
+
     if archetypes_key not in adata.obsm.keys():
         raise ValueError(f"Did not find adata.obsm['{archetypes_key}'].")
     if f"{archetypes_key}_profile" not in adata.varm.keys():
@@ -36,6 +38,7 @@ def impute_genes_using_archetypes(
             f"Did not find adata.varm['{archetypes_key}_profile']. "
             "Please run pp.compute_archetype_feature_specificity() first."
         )
+
     genes = adata.obs.index.intersection(genes)
     Z = adata[:, genes].varm[f"{archetypes_key}_profile"]
     H = adata.obsm[archetypes_key].T
@@ -52,6 +55,7 @@ def impute_specific_genes_using_archetypes(
     archetypes_key: Optional[str] = "H_unified",
     significance: Optional[Literal["upper", "lower"]] = "upper",
 ) -> AnnData:
+
     """
     Impute expression of genes by interpolating over archetype profile
 

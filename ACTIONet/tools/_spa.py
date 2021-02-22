@@ -10,6 +10,7 @@ def spa(
     A: Union[np.ndarray, spmatrix],
     k: int,
 ) -> Tuple[np.ndarray, np.ndarray]:
+
     """
     Successive Projection Algorithm (SPA).
 
@@ -29,6 +30,7 @@ def spa(
     norms
         Residual norm of selected columns
     """
+
     result = _an.run_SPA_rows_sparse(A, k) if issparse(A) else _an.run_SPA(A, k)
 
     return (

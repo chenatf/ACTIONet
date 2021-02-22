@@ -32,6 +32,7 @@ def svd(
     n_iters: Optional[int] = None,
     seed: int = 0,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+
     """
     Randomized singular value decomposition (SVD)
 
@@ -63,6 +64,7 @@ def svd(
     V:
         Matrix of right singular vectors
     """
+
     if solver == "irlb":
         result = _irlb(X, dim, n_iters or 1000, seed)
     elif solver == "feng":
