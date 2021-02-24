@@ -1,52 +1,21 @@
 from typing import Optional
-
-import matplotlib as mpl
-import matplotlib.patheffects as path_effects
-import matplotlib.pyplot as plt
+import plotly.io as pio
+pio.orca.config.use_xvfb = True
+pio.orca.config.save() 
+import plotly.graph_objs as go
+from plotly.graph_objs.scatter import Line
+from plotly.subplots import make_subplots
+import plotly.express as px 
 import numpy as np
 from adjustText import adjust_text
 from anndata import AnnData
 from scipy import stats
-
-from ._color import adjust_lightness, hex_to_rgba
+import pandas as pd 
+from ._color import adjust_lightness, hex_to_rgb, rgb_to_hex
 from .palettes import palette_20, palette_88
 from .. import _misc_utils as ut
 
-
-def layout_labels(
-    X: np.ndarray,
-    Y: np.ndarray,
-    labels: list,
-    ax: mpl.axes.Axes,
-    fontsize: Optional[int] = 1,
-    color: Optional[tuple] = (0., 0., 0., 1.),
-    background: Optional[tuple] = (1., 1., 1., 1.),
-) -> None:
-    texts = []
-    if isinstance(color, tuple):
-        color = [color] * len(labels)
-    for x, y, label, c in zip(X, Y, labels, color):
-        text = ax.text(x, y, label, color=c)
-        text.set_path_effects([
-            path_effects.Stroke(linewidth=5, foreground=background),
-            path_effects.Normal()
-        ])
-        texts.append(text)
-    adjust_text(texts)
-
-def plot_ACTIONet(
-    adata: AnnData,
-    label_key: Optional[str] = None,
-    coordinate_key: Optional[str] = 'X_ACTIONet2D',
-    transparency_key: Optional[str] = None,
-    transparency_z_threshold: Optional[float] = -0.5,
-    transparency_factor: Optional[float] = 1.5,
-    border_contrast_factor: Optional[float] = 0.1,
-    node_size: Optional[float] = 0.1,
-    add_text: Optional[bool] = True,
-    palette: Optional[list] = None,
-    ax: Optional[mpl.axes.Axes] = None,
-) -> Optional[mpl.axes.Axes]:
+def validate_plot_params(adata,coordinate_key,label_key,transparency_key):
     if coordinate_key not in adata.obsm.keys():
         raise ValueError(
             f'Did not find adata.obsm[\'{coordinate_key}\']. '
@@ -56,38 +25,88 @@ def plot_ACTIONet(
         raise ValueError(f'Did not find adata.obs[\'{label_key}\'].')
     if transparency_key is not None and transparency_key not in adata.obs.columns:
         raise ValueError(f'Did not find adata.obs[\'{transparency_key}\'].')
+    if pd.api.types.is_numeric_dtype(adata.obs[transparency_key].dtype) is False: 
+        raise ValueError(f'transparency_key must refer to a numeric values, which is not the case for[\'{transparency_key}\'].')
+    
 
+def layout_labels(
+    X: np.ndarray,
+    Y: np.ndarray,
+    fig:go.Figure,
+    labels: list,
+    fontsize: Optional[int] = 18,
+    color: Optional[str] = "#0000FF",
+    background: Optional[str] = "#FFFFFF") -> None:
+    texts = []
+    if isinstance(color, tuple):
+        color = [color] * len(labels)
+    for x, y, label, c in zip(X, Y, labels, color):
+        fig.add_annotation(
+            x=x,
+            y=y,
+            text=label,
+            bgcolor=background,
+            font=dict(
+                family="sans serif",
+                size=fontsize,
+                color=color))
+
+
+def plot_ACTIONet(
+        adata: AnnData,
+        label_key: Optional[str] = None,
+        coordinate_key: Optional[str] = 'ACTIONet2D',
+        transparency_key: Optional[str] = None,
+        transparency_z_threshold: Optional[float] = -0.5,
+        transparency_factor: Optional[float] = 1.5,
+        border_contrast_factor: Optional[float] = 0.1,
+        node_size: Optional[str] = None,
+        add_text: Optional[bool] = True,
+        palette: Optional[list] = None,
+        output_file: Optional[str]=None):
+    #validate supplied plot parameters
+    validate_plot_params(adata,coordinate_key,label_key,transparency_key)
     coordinates = ut.scale_matrix(adata.obsm[coordinate_key])
 
+    #get mapping of points to colors 
     if label_key is None:
-        v_col = [(r, g, b, 1.0) for r, g, b in adata.obsm['X_denovo_color']]
+        v_col = [(r, g, b) for r, g, b in adata.obsm['denovo_color']]
     else:
         labels = adata.obs[label_key]
         unique_labels = sorted(np.unique(labels))
         if palette is None:
             if len(unique_labels) <= len(palette_20):
-                palette = [hex_to_rgba(color) for color in palette_20]
+                palette = [hex_to_rgb(color) for color in palette_20]
             else:
-                palette = [hex_to_rgba(color) for color in palette_88]
+                palette = [hex_to_rgb(color) for color in palette_88]
         elif isinstance(palette, str):
-            cmap = plt.get_cmap(palette)
-            palette = [cmap(i) for i in range(cmap.N)]
-
+            #get plotly color palette from string specification
+            assert palette.lower() in  px.colors.named_colorscales()
+            if palette in px.colors.qualitative.__dict__.keys():
+                palette=px.colors.qualitative.__dict__[palette]
+            else:
+                palette=px.colors.sequential.__dict__[palette]
         label_colors = {label: palette[i % len(palette)] for i, label in enumerate(unique_labels)}
         v_col = [label_colors[label] for label in labels]
+        #convert hex to rgb
+        v_col_for_border=[hex_to_rgb(i) for i in v_col]
 
-    # Transparency
-    v_col_darkened = [adjust_lightness(color, 1 - border_contrast_factor) for color in v_col]
+
+    # get darkened colors for plot marker outline 
+    v_col_darkened = [adjust_lightness(color, 1 - border_contrast_factor) for color in v_col_for_border]
+    v_col_darkened=[rgb_to_hex(i) for i in v_col_darkened]
+
+    #calculate transparency 
     if transparency_key is not None:
         transparency = adata.obs[transparency_key].values
         z = (transparency - np.mean(transparency)) / np.std(transparency, ddof=1)
         betas = 1 / (1 + np.exp(- transparency_factor * (z - transparency_z_threshold)))
         betas[z > transparency_z_threshold] = 1
         betas **= transparency_factor
-        v_col_border = [(r, g, b, beta) for (r, g, b, a), beta in zip(v_col_darkened, betas)]
     else:
-        v_col_border = v_col_darkened
-
+        betas=[1]*length(v_col_darkened)
+        
+    
     x = coordinates[:,0]
     y = coordinates[:,1]
     x_min = np.min(x)
@@ -100,16 +119,22 @@ def plot_ACTIONet(
     y_min = y_min - (y_max - y_min) / 20
     y_max = y_max + (y_max - y_min) / 20
 
-    permutation = np.random.permutation(adata.shape[0])
-    _ax = ax if ax is not None else plt.subplots()[1]
-    _ax.scatter(
-        x[permutation],
-        y[permutation],
-        c=np.array(v_col)[permutation],
-        s=node_size,
-        edgecolors=np.array(v_col_border)[permutation],
-    )
+    #plotly scatterplot
+    if node_size is None:
+        node_size=[1]*coordinates.shape[0]
 
+
+    fig = make_subplots(rows=1, cols=1)
+    fig.append_trace(go.Scatter(x=coordinates[:,0],
+                                y=coordinates[:,1],
+                                mode='markers',
+                                marker=dict(opacity=betas,
+                                            color=v_col,
+                                            line=dict(width=1,
+                                                      color=v_col_darkened))),row=1,col=1)
+    fig.update_layout(yaxis_range=[y_min,y_max])
+    fig.update_layout(xaxis_range=[x_min,x_max])
+    #add cluster labels, if specified
     if add_text and label_key is not None:
         labels = adata.obs[label_key]
         unique_labels = sorted(np.unique(labels))
@@ -119,18 +144,77 @@ def plot_ACTIONet(
         for i, label in enumerate(unique_labels):
             label_coordinates = coordinates[labels == label]
             centroids[i] = stats.trim_mean(label_coordinates, 0.2, axis=0)
+            cur_text_color=rgb_to_hex(adjust_lightness(hex_to_rgb(palette[i % len(palette)]), 0.5))
+            colors.append(cur_text_color)
+            fig.add_annotation(x=centroids[i,0],
+                               y=centroids[i,1],
+                               text=label,
+                               bgcolor='#FFFFFF',
+                               font=dict(
+                                   family="sans serif",
+                                   size=18,
+                                   color=cur_text_color),row=1,col=1)
+    #save to file if requested by user
+    fig.update_layout(showlegend=False) 
+    if not(output_file is None):
+        fig.write_image(output_file) 
+    #show the figure 
+    fig.show()
 
-            colors.append(adjust_lightness(palette[i % len(palette)], 0.5))
-        layout_labels(
-            centroids[:,0],
-            centroids[:,1],
-            unique_labels,
-            ax=_ax,
-            color=colors,
-            background=hex_to_rgba('#eeeeee')
-        )
+def plot_ACTIONet_interactive(adata: AnnData,
+                              label_key: Optional[str]=None,
+                              transparency_attribute:Optional[str]=None,
+                              transparancy_z_threshold:Optional[float]=-1,
+                              transparancey_factor=1,
+                              node_size:Optional[float]=1,
+                              palette:Optional[str]="CPal20",
+                              enrichment_table:Optional[bool]=False,
+                              top_features:Optional[int]=7,
+                              blacklist_pattern:Optional[str]= "\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
+                              title:Optional[str]="ACTIONet",
+                              coordinate_slot:Optional[str]="ACTIONet2D",
+                              threeD:bool=False):
+    """
+    Creates an interactive ACTIONet plot with plotly 
+    Parameters
+    ---------
+    ace:
+        ACTIONet output object
+    labels:
+        Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot
+    transparency_attr:
+        Additional continuous attribute to project onto the transparency of nodes
+    trans_z_threshold, trans_fact:
+        Control the effect of transparency mapping
+    node_size:
+        Size of nodes in the ACTIONet plot
+    palette:
+        Color palette (named vector or a name for a given known palette)
+    enrichment_table:
+        To project the top-ranked features interactively.
+    top_features:
+        Number of features to show per cell
+    blacklist_pattern:
+        List of genes to filter-out
+    title:
+        Main title of the plot
+    coordinate_slot:
+        coordinate_slot in anndata object where visualization should be stored
+    threeD:
+        Whether to show the plot in 3D
+    Returns
+    -------
+    Visualized ACTIONet
+    """
+    #validate supplied plot parameters
+    validate_plot_params(adata,coordinate_key,label_key,transparency_key)
 
-    _ax.set_xlim(x_min, x_max)
-    _ax.set_ylim(y_min, y_max)
-    _ax.set_axis_off()
-    plt.show()
+    #get the number of variables stored in obs matrix
+    nV=adata.obs.columns.shape[0]
+
+    #determine whether a 3D plot should be generated
+    if((coordinate_slot=="ACTIONet2D") and (threeD is True)):
+        coordinate_slot="ACTIONet3D"
+    
+def plot_ACTIONet_gradient():
+    pass
