@@ -60,7 +60,7 @@ def plot_ACTIONet(
         transparency_z_threshold: Optional[float] = -0.5,
         transparency_factor: Optional[float] = 1.5,
         border_contrast_factor: Optional[float] = 0.1,
-        node_size: Optional[str] = None,
+        node_size: Optional[float] = None,
         add_text: Optional[bool] = True,
         palette: Optional[list] = None,
         output_file: Optional[str]=None):
@@ -215,6 +215,45 @@ def plot_ACTIONet_interactive(adata: AnnData,
     #determine whether a 3D plot should be generated
     if((coordinate_slot=="ACTIONet2D") and (threeD is True)):
         coordinate_slot="ACTIONet3D"
+    coordinates = ut.scale_matrix(adata.obsm[coordinate_key])
     
-def plot_ACTIONet_gradient():
-    pass
+def plot_ACTIONet_gradient(adata: AnnData,
+                           x: Optional[list] = None,
+                           coordinate_key: Optional[str] = 'ACTIONet2D',
+                           transparency_key: Optional[str] = None,
+                           transparency_z_threshold: Optional[float] = -0.5,
+                           transparancey_factor: Optional[float]=3,
+                           alpha_val: Optional[float] = 0.85,
+                           node_size: Optional[float] = 1,
+                           add_text: Optional[bool] = True,
+                           palette: Optional[list] = "Inferno",
+                           title:Optional[str]="",
+                           nonparametric:Optional[bool]=False,
+                           output_file: Optional[str]=None):
+    """
+    Projects a given continuous score on the ACTIONet plot
+    Parameters
+    ----------
+    adata:
+        ACTIONet output object
+    x: 
+        score vector
+    transparancey_key: 
+        additional continuous attribute to project onto the transparency of nodes 
+    transparency_z_threshold: 
+        controls the effect of transparency mapping 
+    transparancy_factor:
+        controls the effect of transparancy mapping
+    node_size: 
+        Size of nodes in the ACTIONet plot 
+    palette: 
+        Color palette (named vector or a name for a given known palette)
+    coordinate_key: 
+       Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')
+    alpha_val: 
+        alpha_val Between [0, 1]. If it is greater than 0, smoothing of scores would be performed
+    output_file: 
+        filename to save plot (optional)
+    """
+    coordinates = ut.scale_matrix(adata.obsm[coordinate_key])
+
