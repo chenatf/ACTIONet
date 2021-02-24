@@ -6,6 +6,7 @@ import _ACTIONet as _an
 def run_simplex_regression(
     A: np.ndarray, B: np.ndarray, computeXtX: bool = False
 ) -> np.ndarray:
+
     """
     Simplex-Constrained Regression (AX-B).
 
@@ -26,4 +27,5 @@ def run_simplex_regression(
     X:
         Coefficient matrix
     """
+
     return _an.run_simplex_regresion(A, B, computeXtX)

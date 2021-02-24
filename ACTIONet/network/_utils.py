@@ -222,7 +222,7 @@ def construct_backbone(
         "coordinates_3D": arch_vis_out["coordinates_3D"],
     }
 
-    # adata.uns['metadatas']["ACTIONet_backbone"] = backbone
+    # adata.uns['metadata']["ACTIONet_backbone"] = backbone
     adata.uns.setdefault("metadata", {}).update(
         {
             "backbone": backbone,
