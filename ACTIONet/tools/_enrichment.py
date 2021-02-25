@@ -1,4 +1,5 @@
 import pandas as pd
+import random 
 import numpy as np 
 from anndata import AnnData
 from typing import Optional
@@ -72,8 +73,6 @@ def assess_categorical_autocorrelation(
         adata: AnnData,
         labels: list,
         perm_no: int=100):
-    #set the random seed
-    np.random.seed(0)
     A=adata.obsp['ACTIONet']
     #if labels is a list of strings, change them to a numerical encoding
     classnames, labels = np.unique(labels, return_inverse=True)
@@ -87,8 +86,11 @@ def assess_categorical_autocorrelation(
     A=A.tocoo()
     dictz,logPval,phi=compute_phi(A,labels,s0,s1,s2)
     rand_phis=[]
+    #set the random seed
+    np.random.seed(0)
+    random.seed(0)    
     for i in range(perm_no):
-        rand_labels=np.random.permutation(labels)
+        rand_labels=random.sample(labels.tolist(),labels.shape[0])
         rand_dictz, rand_logPval, rand_phi=compute_phi(A,rand_labels,s0,s1,s2)
         rand_phis.append(rand_phi)
     z=(phi-np.mean(rand_phis))/np.std(rand_phis)
