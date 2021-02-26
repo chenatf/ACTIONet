@@ -44,7 +44,7 @@ def layout_labels(
         fig.add_annotation(
             x=x,
             y=y,
-            text=label,
+            text=str(label),
             bgcolor=background,
             font=dict(
                 family="sans serif",
@@ -149,7 +149,7 @@ def plot_ACTIONet(
             colors.append(cur_text_color)
             fig.add_annotation(x=centroids[i,0],
                                y=centroids[i,1],
-                               text=label,
+                               text=str(label),
                                bgcolor='#FFFFFF',
                                font=dict(
                                    family="sans serif",
