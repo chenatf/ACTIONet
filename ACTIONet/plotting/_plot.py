@@ -25,7 +25,7 @@ def validate_plot_params(adata,coordinate_key,label_key,transparency_key):
         raise ValueError(f'Did not find adata.obs[\'{label_key}\'].')
     if transparency_key is not None and transparency_key not in adata.obs.columns:
         raise ValueError(f'Did not find adata.obs[\'{transparency_key}\'].')
-    if pd.api.types.is_numeric_dtype(adata.obs[transparency_key].dtype) is False: 
+    if transparency_key is not None and pd.api.types.is_numeric_dtype(adata.obs[transparency_key].dtype) is False: 
         raise ValueError(f'transparency_key must refer to a numeric values, which is not the case for[\'{transparency_key}\'].')
     
 
@@ -71,6 +71,7 @@ def plot_ACTIONet(
     #get mapping of points to colors 
     if label_key is None:
         v_col = [(r, g, b) for r, g, b in adata.obsm['denovo_color']]
+        v_col_for_border=v_col
     else:
         labels = adata.obs[label_key]
         unique_labels = sorted(np.unique(labels))
@@ -104,7 +105,7 @@ def plot_ACTIONet(
         betas[z > transparency_z_threshold] = 1
         betas **= transparency_factor
     else:
-        betas=[1]*length(v_col_darkened)
+        betas=[1]*len(v_col_darkened)
         
     
     x = coordinates[:,0]
