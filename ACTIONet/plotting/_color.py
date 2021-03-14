@@ -1,4 +1,5 @@
 import colorsys
+from plotly.colors import unlabel_rgb 
 def rgb_to_hex(rgb):
     return '#%02x%02x%02x' % rgb
 
@@ -13,6 +14,11 @@ def hex_to_rgb(color):
     return tuple(int(color[i:i+2], 16)  for i in range(0, len(color), 2))
 
 def adjust_lightness(rgb, amount):
+    '''
+    return tuple (r,g,b) 
+    '''
+    if type(rgb)==str:
+        rgb=unlabel_rgb(rgb)
     r, g, b = rgb
     if max(rgb)>1: 
         r=float(r)/255

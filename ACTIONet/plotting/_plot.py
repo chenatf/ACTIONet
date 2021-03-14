@@ -1,4 +1,5 @@
 from typing import Optional
+import plotly as pl 
 import plotly.io as pio
 pio.orca.config.use_xvfb = True
 pio.orca.config.save() 
@@ -67,11 +68,10 @@ def plot_ACTIONet(
     #validate supplied plot parameters
     validate_plot_params(adata,coordinate_key,label_key,transparency_key)
     coordinates = ut.scale_matrix(adata.obsm[coordinate_key])
-
+    
     #get mapping of points to colors 
     if label_key is None:
         v_col = [(r, g, b) for r, g, b in adata.obsm['denovo_color']]
-        v_col_for_border=v_col
     else:
         labels = adata.obs[label_key]
         unique_labels = sorted(np.unique(labels))
@@ -87,16 +87,19 @@ def plot_ACTIONet(
                 palette=px.colors.qualitative.__dict__[palette]
             else:
                 palette=px.colors.sequential.__dict__[palette]
-        label_colors = {label: palette[i % len(palette)] for i, label in enumerate(unique_labels)}
+        #make sure palette colors are rgb values in the 'rgb(r,g,b)' string format 
+        assert len(palette)>0
+        if type(palette[0])==str: 
+            if palette[0].startswith('#'):
+                palette=[hex_to_rgb(i) for i in palette]
+        else:
+            palette=[pl.colors.label_rgb(i) for i in palette]
+        label_colors = {label: palette[i % len(palette)] for i, label in enumerate(unique_labels)}        
         v_col = [label_colors[label] for label in labels]
-        #convert hex to rgb
-        v_col_for_border=[hex_to_rgb(i) for i in v_col]
-
-
-    # get darkened colors for plot marker outline 
-    v_col_darkened = [adjust_lightness(color, 1 - border_contrast_factor) for color in v_col_for_border]
-    v_col_darkened=[rgb_to_hex(i) for i in v_col_darkened]
-
+    v_col_for_border=v_col
+    # get darkened colors for plot marker outline
+    v_col_darkened = [pl.colors.label_rgb(adjust_lightness(color, 1 - border_contrast_factor)) for color in v_col_for_border]
+    
     #calculate transparency 
     if transparency_key is not None:
         transparency = adata.obs[transparency_key].values
@@ -145,7 +148,7 @@ def plot_ACTIONet(
         for i, label in enumerate(unique_labels):
             label_coordinates = coordinates[labels == label]
             centroids[i] = stats.trim_mean(label_coordinates, 0.2, axis=0)
-            cur_text_color=rgb_to_hex(adjust_lightness(hex_to_rgb(palette[i % len(palette)]), 0.5))
+            cur_text_color=pl.colors.label_rgb(adjust_lightness(palette[i % len(palette)], 0.5))
             colors.append(cur_text_color)
             fig.add_annotation(x=centroids[i,0],
                                y=centroids[i,1],
