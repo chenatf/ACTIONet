@@ -229,3 +229,7 @@ def construct_backbone(
         })
 
     return adata if copy else None
+
+
+def correct_cell_annotations():
+    
